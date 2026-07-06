@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vera — Command Center</title>
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="24" fill="%235B9DFF"/><text x="50" y="72" font-size="62" font-family="Arial,sans-serif" font-weight="800" fill="%23081120" text-anchor="middle">V</text></svg>'>
+<meta name="theme-color" content="#0A0E13">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Vera">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0E13; --bg-elev:#0F151D; --panel:#131B25; --panel-2:#17212E;
+  --border:#233241; --border-soft:#1B2631;
+  --ink:#E9EFF5; --ink-2:#A6B6C6; --ink-3:#68798C;
+  --accent:#5B9DFF; --accent-2:#8B7BFF; --accent-ink:#08111F;
+  --good:#2FBF71; --bad:#FF5C63; --warn:#FFB020;
+  --glow:rgba(91,157,255,.20);
+  --shadow:0 10px 30px -12px rgba(0,0,0,.6);
+  --r:14px; --r-sm:10px;
+  --mono:"IBM Plex Mono",ui-monospace,"Cascadia Code",Consolas,monospace;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
+  --disp:"Sora",system-ui,sans-serif;
+}
+:root[data-theme="light"]{
+  --bg:#EEF2F7; --bg-elev:#FFFFFF; --panel:#FFFFFF; --panel-2:#F3F6FA;
+  --border:#DBE3EC; --border-soft:#E8EDF3;
+  --ink:#0F1822; --ink-2:#46566A; --ink-3:#7B8B9D;
+  --accent:#2C6FE0; --accent-2:#6A5BE0; --accent-ink:#FFFFFF;
+  --good:#12A25C; --bad:#E0403F; --warn:#B9770A;
+  --glow:rgba(44,111,224,.14);
+  --shadow:0 12px 28px -14px rgba(20,40,70,.25);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(1100px 500px at 82% -8%,var(--glow),transparent 70%);
+}
+.wrap{position:relative;z-index:1;max-width:1500px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--disp);font-weight:700;letter-spacing:-.02em;text-wrap:balance;margin:0}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-3)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+a{color:var(--accent);text-decoration:none}
+
+/* Header */
+header.top{
+  position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:18px;
+  padding:14px 20px;background:color-mix(in srgb,var(--bg) 82%,transparent);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--border-soft);
+}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.mark{
+  width:38px;height:38px;border-radius:11px;flex:none;display:grid;place-items:center;
+  background:linear-gradient(150deg,var(--accent),var(--accent-2));color:var(--accent-ink);
+  font-family:var(--disp);font-weight:800;font-size:20px;box-shadow:0 6px 18px -6px var(--accent);
+}
+.brand .name{font-family:var(--disp);font-weight:800;font-size:19px;letter-spacing:-.02em;line-height:1}
+.brand .sub{font-family:var(--mono);font-size:10px;letter-spacing:.24em;color:var(--ink-3);text-transform:uppercase}
+.top .spacer{flex:1}
+.status{display:flex;align-items:center;gap:16px;flex:none}
+.mkt{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ink-3)}
+.dot.live{background:var(--good);box-shadow:0 0 0 0 var(--good);animation:pulse 2.4s infinite}
+.dot.closed{background:var(--bad)}
+.dot.pre{background:var(--warn)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--good) 60%,transparent)}70%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.clock{font-family:var(--mono);font-size:13px;color:var(--ink);font-variant-numeric:tabular-nums}
+.tbtn{
+  width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--panel);
+  color:var(--ink-2);cursor:pointer;display:grid;place-items:center;font-size:16px;transition:.2s
+}
+.tbtn:hover{color:var(--ink);border-color:var(--accent)}
+
+/* Nav */
+nav.pills{
+  position:sticky;top:67px;z-index:35;display:flex;gap:8px;overflow-x:auto;padding:12px 20px;
+  background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border-soft);scrollbar-width:thin;
+}
+nav.pills a{
+  flex:none;font-family:var(--mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--ink-2);padding:7px 13px;border-radius:999px;border:1px solid var(--border-soft);
+  background:var(--panel);transition:.18s;white-space:nowrap
+}
+nav.pills a:hover{color:var(--ink);border-color:var(--border)}
+nav.pills a.active{color:var(--accent-ink);background:var(--accent);border-color:var(--accent)}
+
+section{scroll-margin-top:128px;margin-top:40px}
+.sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:16px;flex-wrap:wrap}
+.sec-head h2{font-size:clamp(19px,2.4vw,25px)}
+.sec-head .note{color:var(--ink-3);font-size:13px}
+
+/* Cards & panels */
+.panel{background:var(--panel);border:1px solid var(--border-soft);border-radius:var(--r);box-shadow:var(--shadow)}
+.grid{display:grid;gap:16px}
+.tiles{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.tile{padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+.tile .k{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.tile .v{font-family:var(--disp);font-weight:700;font-size:26px;line-height:1.1}
+.tile .m{font-size:12.5px;color:var(--ink-2)}
+.v.good{color:var(--good)} .v.bad{color:var(--bad)} .v.warn{color:var(--warn)} .v.acc{color:var(--accent)}
+
+.card{padding:18px}
+.card h3{font-size:16px;margin-bottom:4px}
+.card .lead{color:var(--ink-2);font-size:13.5px;margin:2px 0 14px}
+
+.chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;
+  padding:3px 9px;border-radius:999px;border:1px solid var(--border);color:var(--ink-2);background:var(--panel-2)}
+.chip.good{color:var(--good);border-color:color-mix(in srgb,var(--good) 45%,var(--border))}
+.chip.bad{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,var(--border))}
+.chip.warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,var(--border))}
+.chip.acc{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,var(--border))}
+
+/* Charts */
+.chart-shell{padding:10px;border-radius:var(--r);overflow:hidden}
+.chart-main{height:520px}
+.chart-main .tradingview-widget-container,.chart-main .tradingview-widget-container__widget{height:100%!important}
+.sym-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.sym-row button{
+  font-family:var(--mono);font-size:12px;padding:6px 11px;border-radius:8px;cursor:pointer;
+  border:1px solid var(--border-soft);background:var(--panel-2);color:var(--ink-2);transition:.15s
+}
+.sym-row button:hover{color:var(--ink);border-color:var(--border)}
+.sym-row button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.mini-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.mini{height:150px;padding:0;overflow:hidden;border-radius:var(--r-sm)}
+.two-col{grid-template-columns:1.4fr 1fr}
+.overview{height:420px;padding:8px}
+@media(max-width:900px){.two-col{grid-template-columns:1fr}.chart-main{height:420px}}
+
+/* Rules / inputs */
+.rule-grid{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.field{display:flex;flex-direction:column;gap:6px;padding:14px 16px}
+.field label{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.field .in{display:flex;align-items:center;gap:8px}
+.field input{
+  width:100%;background:var(--panel-2);border:1px solid var(--border);color:var(--ink);
+  border-radius:9px;padding:10px 12px;font-family:var(--mono);font-size:16px;font-variant-numeric:tabular-nums
+}
+.field input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.field .unit{font-family:var(--mono);color:var(--ink-3);font-size:14px}
+
+.check{display:flex;align-items:flex-start;gap:11px;padding:10px 4px;border-bottom:1px solid var(--border-soft);cursor:pointer}
+.check:last-child{border-bottom:0}
+.check input{appearance:none;-webkit-appearance:none;width:20px;height:20px;flex:none;margin-top:1px;
+  border:1.5px solid var(--border);border-radius:6px;background:var(--panel-2);cursor:pointer;position:relative;transition:.15s}
+.check input:checked{background:var(--accent);border-color:var(--accent)}
+.check input:checked::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:var(--accent-ink);font-size:13px;font-weight:700}
+.check input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.check span{font-size:14px;color:var(--ink)}
+.check.done span{color:var(--ink-3);text-decoration:line-through}
+
+/* Meters */
+.meter{height:9px;border-radius:999px;background:var(--panel-2);overflow:hidden;border:1px solid var(--border-soft)}
+.meter>i{display:block;height:100%;border-radius:999px;background:var(--accent);transition:width .5s ease}
+.meter.good>i{background:var(--good)}.meter.warn>i{background:var(--warn)}.meter.bad>i{background:var(--bad)}
+
+/* Playbook */
+.play-grid{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.setup{padding:16px;display:flex;flex-direction:column;gap:10px;transition:.2s;border:1px solid var(--border-soft)}
+.setup:hover{border-color:var(--accent);transform:translateY(-2px)}
+.setup h4{margin:0;font-family:var(--disp);font-size:15px}
+.setup .es{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.04em}
+.setup p{margin:0;font-size:13px;color:var(--ink-2)}
+.setup .row{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px;margin-top:2px}
+.setup .wr{display:flex;align-items:center;gap:7px}
+.setup .wr input{width:52px;background:var(--panel-2);border:1px solid var(--border);color:var(--ink);
+  border-radius:7px;padding:4px 6px;font-family:var(--mono);font-size:13px;text-align:center}
+
+/* Options */
+.greek{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--border-soft)}
+.greek:last-child{border-bottom:0}
+.greek .g{font-family:var(--disp);font-weight:700;font-size:17px;color:var(--accent)}
+.greek .d{font-size:13.5px;color:var(--ink-2)}
+.tree{display:flex;flex-direction:column;gap:10px}
+.branch{padding:12px 14px;border-radius:var(--r-sm);background:var(--panel-2);border:1px solid var(--border-soft);font-size:13.5px}
+.branch b{color:var(--ink)} .branch .q{color:var(--accent);font-family:var(--mono);font-size:12px}
+
+/* Lessons */
+.lessons{display:flex;flex-direction:column;gap:9px;margin-top:12px}
+.lesson{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;background:var(--panel-2);border:1px solid var(--border-soft);border-radius:var(--r-sm)}
+.lesson .dt{font-family:var(--mono);font-size:11px;color:var(--ink-3);flex:none}
+.lesson .tx{font-size:13.5px;color:var(--ink)}
+.lesson button{margin-left:auto;background:none;border:0;color:var(--ink-3);cursor:pointer;font-size:15px;flex:none}
+.lesson button:hover{color:var(--bad)}
+.addrow{display:flex;gap:9px;margin-top:12px;flex-wrap:wrap}
+.addrow input{flex:1;min-width:200px;background:var(--panel-2);border:1px solid var(--border);color:var(--ink);
+  border-radius:9px;padding:11px 13px;font-size:14px;font-family:var(--sans)}
+.addrow input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.btn{font-family:var(--mono);font-size:13px;letter-spacing:.03em;padding:11px 16px;border-radius:9px;cursor:pointer;
+  background:var(--accent);color:var(--accent-ink);border:1px solid var(--accent);transition:.15s;white-space:nowrap}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--ink-2);border-color:var(--border)}
+.btn.ghost:hover{color:var(--ink);border-color:var(--accent)}
+
+/* Roadmap */
+.phase{padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.phase .ph-head{display:flex;align-items:center;gap:10px}
+.phase .n{font-family:var(--disp);font-weight:800;font-size:13px;width:26px;height:26px;border-radius:8px;
+  display:grid;place-items:center;background:var(--panel-2);border:1px solid var(--border);color:var(--accent)}
+
+.foot{margin-top:48px;padding-top:20px;border-top:1px solid var(--border-soft);color:var(--ink-3);font-size:12.5px;text-align:center}
+.disc{margin-top:10px;padding:12px 16px;border-radius:var(--r-sm);background:color-mix(in srgb,var(--warn) 8%,var(--panel));
+  border:1px solid color-mix(in srgb,var(--warn) 30%,var(--border-soft));color:var(--ink-2);font-size:12.5px}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+.reveal{opacity:0;transform:translateY(10px);animation:rise .6s ease forwards}
+@keyframes rise{to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <div class="mark">V</div>
+    <div>
+      <div class="name">VERA</div>
+      <div class="sub">Command Center</div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <div class="status">
+    <div class="mkt"><span class="dot" id="mktDot"></span><span id="mktState">—</span></div>
+    <div class="clock" id="clock">--:--:-- ET</div>
+    <button class="tbtn" id="themeBtn" title="Toggle light / dark" aria-label="Toggle theme">◐</button>
+  </div>
+</header>
+
+<!-- Live ticker tape -->
+<div class="tradingview-widget-container" style="border-bottom:1px solid var(--border-soft)">
+  <div class="tradingview-widget-container__widget"></div>
+  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+  {"symbols":[{"proName":"SP:SPX","title":"S&P 500"},{"proName":"NASDAQ:NDX","title":"Nasdaq 100"},{"proName":"AMEX:SPY","title":"SPY"},{"proName":"NASDAQ:QQQ","title":"QQQ"},{"proName":"AMEX:IWM","title":"IWM"},{"proName":"AMEX:DIA","title":"DIA"},{"proName":"NASDAQ:NVDA","title":"NVDA"},{"proName":"NASDAQ:AMD","title":"AMD"},{"proName":"NASDAQ:AVGO","title":"AVGO"},{"proName":"NASDAQ:MU","title":"MU"},{"proName":"NASDAQ:QCOM","title":"QCOM"},{"proName":"NASDAQ:AAPL","title":"AAPL"},{"proName":"NASDAQ:MSFT","title":"MSFT"},{"proName":"NASDAQ:GOOGL","title":"GOOGL"},{"proName":"NASDAQ:META","title":"META"},{"proName":"NASDAQ:AMZN","title":"AMZN"},{"proName":"NASDAQ:NFLX","title":"NFLX"},{"proName":"NASDAQ:TSLA","title":"TSLA"}],"showSymbolLogo":true,"isTransparent":true,"displayMode":"adaptive","colorTheme":"dark","locale":"en"}
+  </script>
+</div>
+
+<nav class="pills" id="nav">
+  <a href="#overview" class="active">Overview</a>
+  <a href="#charts">Live Charts</a>
+  <a href="#guidelines">Guidelines</a>
+  <a href="#playbook">Playbook</a>
+  <a href="#options">Options</a>
+  <a href="#risk">Risk &amp; Sizing</a>
+  <a href="#mistakes">Mistakes</a>
+  <a href="#learning">Learning</a>
+</nav>
+
+<div class="wrap">
+
+  <!-- OVERVIEW -->
+  <section id="overview">
+    <div class="sec-head"><h2>Market Pulse</h2><span class="note">Live snapshot of your book &amp; the tape. Updated in real time.</span></div>
+    <div class="grid tiles">
+      <div class="tile panel reveal"><span class="k">Instruments</span><span class="v acc">Stocks + Options</span><span class="m">Traded daily · ThinkorSwim</span></div>
+      <div class="tile panel reveal"><span class="k">Watchlist</span><span class="v">17</span><span class="m">12 stocks · 4 ETFs · S&amp;P 500</span></div>
+      <div class="tile panel reveal"><span class="k">Rules set</span><span class="v warn" id="rulesSetTile">0 / 4</span><span class="m">Fill your risk rules below ↓</span></div>
+      <div class="tile panel reveal"><span class="k">Open positions</span><span class="v" id="posTile">Flat</span><span class="m">Tell Vera when you open one</span></div>
+    </div>
+    <div class="grid two-col" style="margin-top:16px">
+      <div class="panel overview chart-shell reveal">
+        <div class="tradingview-widget-container" style="height:100%">
+          <div class="tradingview-widget-container__widget" style="height:100%"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
+          {"colorTheme":"dark","dateRange":"1D","showChart":true,"locale":"en","isTransparent":true,"showSymbolLogo":true,"width":"100%","height":"100%","tabs":[{"title":"Indices","symbols":[{"s":"SP:SPX","d":"S&P 500"},{"s":"NASDAQ:NDX","d":"Nasdaq 100"},{"s":"AMEX:SPY","d":"SPY"},{"s":"NASDAQ:QQQ","d":"QQQ"},{"s":"AMEX:IWM","d":"IWM"},{"s":"AMEX:DIA","d":"DIA"}]},{"title":"Semis / AI","symbols":[{"s":"NASDAQ:NVDA"},{"s":"NASDAQ:AMD"},{"s":"NASDAQ:AVGO"},{"s":"NASDAQ:MU"},{"s":"NASDAQ:QCOM"}]},{"title":"Mega-cap","symbols":[{"s":"NASDAQ:AAPL"},{"s":"NASDAQ:MSFT"},{"s":"NASDAQ:GOOGL"},{"s":"NASDAQ:META"},{"s":"NASDAQ:AMZN"},{"s":"NASDAQ:NFLX"},{"s":"NASDAQ:TSLA"}]}]}
+          </script>
+        </div>
+      </div>
+      <div class="panel card reveal">
+        <h3>Today's posture</h3>
+        <p class="lead">Vera's read lands here each morning via your 7 AM Telegram brief. The dashboard is your live cockpit; the brief is the daily game plan.</p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="branch"><span class="q">DIRECTION</span><br><b>Follow the tape above.</b> Trade with the trend of the indices unless your setup says otherwise.</div>
+          <div class="branch"><span class="q">SEMIS SPLIT</span><br>NVDA vs AMD are rotating apart — treat "chips" as two trades, not one.</div>
+          <div class="branch"><span class="q">DISCIPLINE</span><br>No trade without a named setup, a stop set first, and R:R that clears your rule.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIVE CHARTS -->
+  <section id="charts">
+    <div class="sec-head"><h2>Live Charts</h2><span class="note">Full watchlist, live. Click a ticker to load it in the main chart.</span></div>
+    <div class="sym-row" id="symRow"></div>
+    <div class="panel chart-shell chart-main reveal"><div id="mainChart" style="height:100%"></div></div>
+    <div class="sec-head" style="margin-top:26px"><h3 style="font-family:var(--disp);font-size:16px">Watchlist — live minis</h3><span class="note">Semis, mega-cap tech &amp; index ETFs at a glance.</span></div>
+    <div class="grid mini-grid" id="miniGrid"></div>
+  </section>
+
+  <!-- GUIDELINES -->
+  <section id="guidelines">
+    <div class="sec-head"><h2>My Guidelines</h2><span class="note">Your rules. Fill the blanks — they save automatically and Vera enforces them.</span></div>
+    <div class="grid rule-grid">
+      <div class="field panel"><label>Max risk / trade</label><div class="in"><input id="r_risk" type="number" placeholder="e.g. 1" min="0" step="0.1"><span class="unit">% of account</span></div></div>
+      <div class="field panel"><label>Max total open risk</label><div class="in"><input id="r_open" type="number" placeholder="e.g. 3" min="0" step="0.1"><span class="unit">% at once</span></div></div>
+      <div class="field panel"><label>Daily loss limit</label><div class="in"><input id="r_daily" type="number" placeholder="e.g. 3" min="0" step="0.1"><span class="unit">% → stop</span></div></div>
+      <div class="field panel"><label>Minimum R : R</label><div class="in"><input id="r_rr" type="number" placeholder="e.g. 2" min="0" step="0.1"><span class="unit">: 1</span></div></div>
+    </div>
+    <div class="grid two-col" style="margin-top:16px">
+      <div class="panel card">
+        <h3>Entries</h3>
+        <div id="entryRules"></div>
+      </div>
+      <div class="panel card">
+        <h3>Exits &amp; Process</h3>
+        <div id="exitRules"></div>
+      </div>
+    </div>
+    <div class="disc">These start from your vault's <b>Trading Rules — Non-Negotiable</b>. Rules are earned from lessons; we sharpen them as we go. Vera flags any plan that breaks a rule <b>before</b> it becomes a trade.</div>
+  </section>
+
+  <!-- PLAYBOOK -->
+  <section id="playbook">
+    <div class="sec-head"><h2>Setups Playbook</h2><span class="note">From your INVESTEP training — track win-rate on each so we keep what works.</span></div>
+    <div class="grid play-grid" id="playGrid"></div>
+    <div class="disc">These are seeded from your course methodology. The exact entry/invalidation rules are yours to sharpen — as you log trades, Vera surfaces which setups actually pay and which to cut.</div>
+  </section>
+
+  <!-- OPTIONS -->
+  <section id="options">
+    <div class="sec-head"><h2>Options Cockpit</h2><span class="note">You trade options daily — this is the part that separates you from the crowd.</span></div>
+    <div class="grid two-col">
+      <div class="panel card">
+        <h3>The Greeks that matter daily</h3>
+        <p class="lead">Direction, time, and volatility — in plain English.</p>
+        <div class="greek"><span class="g">Δ Delta</span><span class="d"><b>Direction.</b> How much the option moves per $1 in the stock. ~0.50 at the money. Higher delta = more stock-like.</span></div>
+        <div class="greek"><span class="g">Θ Theta</span><span class="d"><b>Time decay.</b> What you lose each day just from time passing. It works against buyers, for sellers. Worst near expiration.</span></div>
+        <div class="greek"><span class="g">V Vega</span><span class="d"><b>Volatility.</b> How much the option moves when implied volatility (IV) changes. High IV = expensive options = crush risk.</span></div>
+        <div class="greek"><span class="g">Γ Gamma</span><span class="d"><b>Acceleration.</b> How fast delta changes. High near expiry — why short-dated options whip around.</span></div>
+      </div>
+      <div class="panel card">
+        <h3>Buy or sell premium? — decision tree</h3>
+        <p class="lead">The single most useful options question, every day.</p>
+        <div class="tree">
+          <div class="branch"><span class="q">STEP 1 — IV</span><br>Is implied volatility (IV Rank) <b>high</b> or <b>low</b> right now?</div>
+          <div class="branch"><span class="q">LOW IV + directional view</span><br><b>Buy premium</b> (long calls/puts or debit spreads). Options are cheap; you're paying little for time.</div>
+          <div class="branch"><span class="q">HIGH IV + directional view</span><br>Lean to <b>debit spreads</b> or <b>selling premium</b> (credit spreads) — don't overpay for rich vol, and dodge the IV crush.</div>
+          <div class="branch"><span class="q">EARNINGS this week?</span><br><b>Beware IV crush.</b> Buying single options into earnings often loses even when you're right on direction. Spreads reduce it.</div>
+        </div>
+      </div>
+    </div>
+    <div class="disc">Education, not advice. IV Rank and the expected move are on your ThinkorSwim chain — Vera flags earnings/IV-crush timing in your morning brief.</div>
+  </section>
+
+  <!-- RISK -->
+  <section id="risk">
+    <div class="sec-head"><h2>Risk &amp; Position Sizing</h2><span class="note">The math that keeps the account alive. Run it before every trade.</span></div>
+    <div class="grid two-col">
+      <div class="panel card">
+        <h3>Position size calculator</h3>
+        <p class="lead">Enter the trade — get your size, dollar risk, and how it stacks against your rule.</p>
+        <div class="grid" style="grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field" style="padding:0"><label>Account size ($)</label><input id="c_acct" type="number" placeholder="25000" class="mono"></div>
+          <div class="field" style="padding:0"><label>Risk this trade (%)</label><input id="c_pct" type="number" placeholder="1" step="0.1" class="mono"></div>
+          <div class="field" style="padding:0"><label>Entry price ($)</label><input id="c_entry" type="number" placeholder="180.00" step="0.01" class="mono"></div>
+          <div class="field" style="padding:0"><label>Stop price ($)</label><input id="c_stop" type="number" placeholder="176.00" step="0.01" class="mono"></div>
+        </div>
+        <button class="btn" style="margin-top:14px;width:100%" id="calcBtn">Calculate size</button>
+        <div id="calcOut" style="margin-top:16px;display:none">
+          <div class="grid tiles" style="grid-template-columns:1fr 1fr">
+            <div class="tile" style="padding:12px 0"><span class="k">Shares</span><span class="v acc" id="o_shares">—</span></div>
+            <div class="tile" style="padding:12px 0"><span class="k">Dollar risk</span><span class="v" id="o_risk">—</span></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-2);margin:6px 0 6px"><span>Risk vs your max/trade rule</span><span class="mono" id="o_vs">—</span></div>
+          <div class="meter" id="o_meter"><i style="width:0%"></i></div>
+          <p class="mono" id="o_note" style="font-size:12px;color:var(--ink-3);margin:10px 0 0"></p>
+        </div>
+      </div>
+      <div class="panel card">
+        <h3>Risk rulebook</h3>
+        <p class="lead">The risk-manager agent has veto power. These are the lines we don't cross.</p>
+        <div id="riskRules"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MISTAKES -->
+  <section id="mistakes">
+    <div class="sec-head"><h2>Mistake Tracker &amp; Lessons</h2><span class="note">"Know any mistakes I made." We catch them, log them, and never repeat them.</span></div>
+    <div class="grid two-col">
+      <div class="panel card">
+        <h3>Pre-trade checklist</h3>
+        <p class="lead">Run this before every click. It resets when you clear it — a fresh check each trade.</p>
+        <div id="pretrade"></div>
+        <button class="btn ghost" style="margin-top:12px" id="resetPre">Reset for next trade</button>
+      </div>
+      <div class="panel card">
+        <h3>Common mistakes to avoid</h3>
+        <p class="lead">The ones that quietly wreck accounts in your style of trading.</p>
+        <div id="commonMistakes"></div>
+      </div>
+    </div>
+    <div class="panel card" style="margin-top:16px">
+      <h3>Lessons log</h3>
+      <p class="lead">One lesson per losing trade, one per blind spot Vera catches. This is where the edge compounds.</p>
+      <div class="lessons" id="lessons"></div>
+      <div class="addrow">
+        <input id="lessonInput" type="text" placeholder="What did this trade teach you? (e.g. 'Held past my stop on NVDA — hope is not a plan.')">
+        <button class="btn" id="addLesson">Log lesson</button>
+      </div>
+    </div>
+    <div class="panel card" style="margin-top:16px">
+      <h3>Blind spots to close</h3>
+      <p class="lead">Open questions from your vault. Answering these sharpens every trade — tell Vera and she'll fill them in.</p>
+      <div id="blindspots"></div>
+    </div>
+  </section>
+
+  <!-- LEARNING -->
+  <section id="learning">
+    <div class="sec-head"><h2>Learning Roadmap</h2><span class="note">Your path to sharper technical &amp; fundamental analysis. Check off as you go.</span></div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+      <div class="meter good" style="flex:1"><i id="learnBar" style="width:0%"></i></div>
+      <span class="mono" id="learnPct" style="color:var(--ink-2);font-size:13px">0%</span>
+    </div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))" id="phases"></div>
+  </section>
+
+  <div class="foot">
+    Vera — Command Center · built for tamay's trading empire · <span class="mono" id="builtDate"></span>
+    <div class="disc" style="max-width:820px;margin:14px auto 0">Everything here is analysis and education, <b>not financial advice</b>. Vera is an AI right hand, not a licensed advisor — you size and you decide. Your inputs (rules, lessons, progress) are saved privately in this browser.</div>
+  </div>
+</div>
+
+<script>
+/* ---------- helpers ---------- */
+const $=(s,e=document)=>e.querySelector(s), $$=(s,e=document)=>[...e.querySelectorAll(s)];
+const store={get:(k,d)=>{try{return JSON.parse(localStorage.getItem('vera_'+k))??d}catch{return d}},set:(k,v)=>localStorage.setItem('vera_'+k,JSON.stringify(v))};
+const fmt=n=>n.toLocaleString('en-US',{maximumFractionDigits:0});
+const money=n=>'$'+n.toLocaleString('en-US',{maximumFractionDigits:2});
+
+/* ---------- theme ---------- */
+const root=document.documentElement;
+const savedTheme=store.get('theme',null);
+if(savedTheme) root.dataset.theme=savedTheme;
+$('#themeBtn').onclick=()=>{const t=root.dataset.theme==='dark'?'light':'dark';root.dataset.theme=t;store.set('theme',t);buildCharts();};
+
+/* ---------- clock + market status (ET) ---------- */
+function etParts(){
+  const f=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hour12:false,weekday:'short',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const p={};f.formatToParts(new Date()).forEach(x=>p[x.type]=x.value);return p;
+}
+function tick(){
+  const p=etParts();
+  $('#clock').textContent=`${p.hour}:${p.minute}:${p.second} ET`;
+  const mins=(+p.hour)*60+(+p.minute), wd=['Mon','Tue','Wed','Thu','Fri'].includes(p.weekday);
+  const dot=$('#mktDot'),st=$('#mktState');dot.className='dot';
+  if(!wd){dot.classList.add('closed');st.textContent='Weekend — closed';}
+  else if(mins>=570&&mins<960){dot.classList.add('live');st.textContent='Market open';}
+  else if(mins>=240&&mins<570){dot.classList.add('pre');st.textContent='Pre-market';}
+  else if(mins>=960&&mins<1200){dot.classList.add('pre');st.textContent='After hours';}
+  else{dot.classList.add('closed');st.textContent='Closed';}
+}
+setInterval(tick,1000);tick();
+$('#builtDate').textContent=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+/* ---------- TradingView charts ---------- */
+const WATCH=[
+  ['NASDAQ:NVDA','NVDA'],['NASDAQ:AMD','AMD'],['NASDAQ:AVGO','AVGO'],['NASDAQ:MU','MU'],['NASDAQ:QCOM','QCOM'],
+  ['NASDAQ:AAPL','AAPL'],['NASDAQ:MSFT','MSFT'],['NASDAQ:GOOGL','GOOGL'],['NASDAQ:META','META'],['NASDAQ:AMZN','AMZN'],
+  ['NASDAQ:NFLX','NFLX'],['NASDAQ:TSLA','TSLA'],['AMEX:SPY','SPY'],['NASDAQ:QQQ','QQQ'],['AMEX:IWM','IWM'],['AMEX:DIA','DIA']
+];
+let curSym=store.get('sym','NASDAQ:NVDA');
+function tv(container,widget,config){
+  container.innerHTML='<div class="tradingview-widget-container__widget" style="height:100%"></div>';
+  container.classList.add('tradingview-widget-container');
+  const s=document.createElement('script');
+  s.src='https://s3.tradingview.com/external-embedding/embed-widget-'+widget+'.js';
+  s.type='text/javascript';s.async=true;s.text=JSON.stringify(config);
+  container.appendChild(s);
+}
+function theme(){return root.dataset.theme==='light'?'light':'dark';}
+function buildMain(){
+  tv($('#mainChart'),'advanced-chart',{autosize:true,symbol:curSym,interval:'D',timezone:'America/New_York',
+    theme:theme(),style:'1',locale:'en',hide_side_toolbar:false,allow_symbol_change:true,
+    withdateranges:true,details:true,support_host:'https://www.tradingview.com'});
+}
+function buildSymRow(){
+  const row=$('#symRow');row.innerHTML='';
+  WATCH.forEach(([sym,lbl])=>{
+    const b=document.createElement('button');b.textContent=lbl;if(sym===curSym)b.className='on';
+    b.onclick=()=>{curSym=sym;store.set('sym',sym);$$('#symRow button').forEach(x=>x.classList.remove('on'));b.classList.add('on');buildMain();};
+    row.appendChild(b);
+  });
+}
+function buildMinis(){
+  const g=$('#miniGrid');g.innerHTML='';
+  WATCH.forEach(([sym])=>{
+    const d=document.createElement('div');d.className='panel mini chart-shell';
+    g.appendChild(d);
+    tv(d,'mini-symbol-overview',{symbol:sym,width:'100%',height:'100%',locale:'en',dateRange:'1D',
+      colorTheme:theme(),isTransparent:true,autosize:true,trendLineColor:'#5B9DFF',
+      underLineColor:'rgba(91,157,255,0.15)',underLineBottomColor:'rgba(91,157,255,0)'});
+  });
+}
+function buildCharts(){buildMain();buildMinis();}
+buildSymRow();buildCharts();
+
+/* ---------- Guidelines: rules ---------- */
+const ruleInputs=['r_risk','r_open','r_daily','r_rr'];
+ruleInputs.forEach(id=>{const el=$('#'+id);el.value=store.get(id,'')||'';el.oninput=()=>{store.set(id,el.value);updateRulesTile();};});
+function updateRulesTile(){const n=ruleInputs.filter(id=>String(store.get(id,'')).trim()!=='').length;
+  const t=$('#rulesSetTile');t.textContent=n+' / 4';t.className='v '+(n===4?'good':n?'warn':'bad');}
+updateRulesTile();
+
+const entryRules=[['setup','I can name the setup and the invalidation before I click.'],['rr','R:R clears my minimum rule.'],['emo','Not a boredom, revenge, or FOMO trade.']];
+const exitRules=[['plan','Exit planned before entry — stop + target.'],['partial','Take partials at plan; let runners run per rules.'],['stopfirst','Stop is set BEFORE entry. No stop, no trade.'],['nolosers','No adding to losers.'],['log','Trade will be logged after.']];
+const riskRules=[['stop','Every trade has a stop before entry.'],['size','Size within my max-risk-per-trade rule.'],['open','Total open risk under my cap.'],['daily','Honor the daily loss limit — stop when hit.'],['veto','Respect Vera / risk-manager veto.']];
+function renderChecks(host,list,key){
+  const saved=store.get(key,{});const el=$(host);el.innerHTML='';
+  list.forEach(([k,txt])=>{
+    const lab=document.createElement('label');lab.className='check'+(saved[k]?' done':'');
+    lab.innerHTML=`<input type="checkbox" ${saved[k]?'checked':''}><span>${txt}</span>`;
+    lab.querySelector('input').onchange=e=>{saved[k]=e.target.checked;store.set(key,saved);lab.classList.toggle('done',e.target.checked);};
+    el.appendChild(lab);
+  });
+}
+renderChecks('#entryRules',entryRules,'entryRules');
+renderChecks('#exitRules',exitRules,'exitRules');
+renderChecks('#riskRules',riskRules,'riskRules');
+
+/* ---------- Playbook (INVESTEP setups) ---------- */
+const SETUPS=[
+  ['Support &amp; Resistance','Niveles de Soporte y Resistencia','Trade the reaction at key levels — buy support in an uptrend, sell/short resistance in a downtrend. The level must be tested and respected.'],
+  ['NY Open Jumps','Saltos NY','The opening-range move at the 9:30 ET bell. Wait for the range to form, then trade the break with the trend of the tape.'],
+  ['Trend Change','Cambio de Tendencia','Structure flips — lower-highs turn to higher-highs (or vice-versa). Enter on confirmation, not the first candle. Works on 15m and Daily.'],
+  ['Mid-Point Bounce','Rebote Punto Medio','Price reacts off the mid-point of a prior range/move. Confluence with a level or MA strengthens it.'],
+  ['Block Movement','Movimiento en Bloques','Price travels in measured blocks/legs. Read where the current block is exhausting to time entries and exits.'],
+  ['Bollinger Bands','Bollinger Bands','Band squeeze = coiling for a move; band ride = strong trend; band tag + reversal = mean-reversion. Pair with structure.'],
+  ['The Million Strategy','Estrategia del Millón','Your highest-conviction, rules-based core play. Only take it when every condition lines up — this is the A+ setup.'],
+  ['Reinforcement Points','Puntos de Refuerzo','Add/confirm zones where the thesis strengthens. Use to scale or to confirm — never to rescue a losing idea.']
+];
+function buildPlaybook(){
+  const g=$('#playGrid');g.innerHTML='';const wr=store.get('winrate',{});
+  SETUPS.forEach(([en,es,desc],i)=>{
+    const c=document.createElement('div');c.className='panel setup';
+    c.innerHTML=`<div><h4>${en}</h4><div class="es">${es}</div></div><p>${desc}</p>
+      <div class="row"><span class="chip acc">Track it</span>
+      <span class="wr">Win-rate <input type="number" min="0" max="100" value="${wr['s'+i]??''}" placeholder="—" data-i="${i}"><span class="unit mono" style="color:var(--ink-3)">%</span></span></div>`;
+    c.querySelector('input').oninput=e=>{wr['s'+i]=e.target.value;store.set('winrate',wr);};
+    g.appendChild(c);
+  });
+}
+buildPlaybook();
+
+/* ---------- Position size calculator ---------- */
+$('#calcBtn').onclick=()=>{
+  const acct=+$('#c_acct').value, pct=+$('#c_pct').value, entry=+$('#c_entry').value, stop=+$('#c_stop').value;
+  if(!acct||!pct||!entry||!stop||entry===stop){$('#calcOut').style.display='block';$('#o_shares').textContent='—';$('#o_risk').textContent='—';$('#o_note').textContent='Enter account, risk %, entry and a different stop.';$('#o_vs').textContent='—';$('#o_meter').querySelector('i').style.width='0%';return;}
+  const dollarRisk=acct*(pct/100), perShare=Math.abs(entry-stop), shares=Math.floor(dollarRisk/perShare);
+  const realRisk=shares*perShare, realPct=realRisk/acct*100;
+  $('#calcOut').style.display='block';
+  $('#o_shares').textContent=fmt(shares);
+  $('#o_risk').textContent=money(realRisk);
+  const maxRule=+store.get('r_risk','')||null;
+  const meter=$('#o_meter'),bar=meter.querySelector('i');
+  if(maxRule){const ratio=Math.min(realPct/maxRule*100,100);bar.style.width=ratio+'%';
+    meter.className='meter '+(realPct>maxRule?'bad':realPct>maxRule*0.9?'warn':'good');
+    $('#o_vs').textContent=realPct.toFixed(2)+'% vs '+maxRule+'% max';
+    $('#o_note').textContent=realPct>maxRule?'⚠ Over your max-risk rule — cut size or widen nothing, tighten the stop.':'Within your rule. '+shares+' shares risks '+money(realRisk)+' if stopped.';
+  }else{bar.style.width=Math.min(realPct*10,100)+'%';meter.className='meter';
+    $('#o_vs').textContent=realPct.toFixed(2)+'% of account';
+    $('#o_note').textContent='Set your max-risk-per-trade rule above to see this vs your limit. For options: risk ÷ (premium × 100) ≈ contracts.';}
+};
+
+/* ---------- Mistakes: pretrade, common, lessons, blindspots ---------- */
+const pretrade=[['s','Setup named + invalidation known'],['stop','Stop set BEFORE entry'],['rr','R:R clears my rule'],['size','Size within max risk %'],['iv','Options: checked IV / earnings (crush risk)'],['emo','Clear head — not revenge / FOMO / boredom']];
+renderChecks('#pretrade',pretrade,'pretrade');
+$('#resetPre').onclick=()=>{store.set('pretrade',{});renderChecks('#pretrade',pretrade,'pretrade');};
+
+const common=[['plan','Not following my own plan / rules'],['nostop','Trading without a stop, or moving it wider to avoid the loss'],['size','Oversizing — one trade too big for the account'],['revenge','Revenge trading after a loss'],['trend','Fighting the trend of the tape'],['ivbuy','Buying single options into earnings → IV crush'],['runners','Cutting winners early, letting losers run'],['overtrade','Overtrading — forcing trades with no edge']];
+renderChecks('#commonMistakes',common,'commonMistakes');
+
+function renderLessons(){
+  const list=store.get('lessons',[]);const host=$('#lessons');host.innerHTML='';
+  if(!list.length){host.innerHTML='<div class="lesson"><span class="tx" style="color:var(--ink-3)">No lessons logged yet. The first losing trade is tuition — write down what it taught you.</span></div>';return;}
+  list.forEach((l,i)=>{
+    const d=document.createElement('div');d.className='lesson';
+    d.innerHTML=`<span class="dt">${l.d}</span><span class="tx">${l.t}</span><button title="Delete" aria-label="Delete lesson">✕</button>`;
+    d.querySelector('button').onclick=()=>{list.splice(i,1);store.set('lessons',list);renderLessons();};
+    host.appendChild(d);
+  });
+}
+function addLesson(){const inp=$('#lessonInput'),t=inp.value.trim();if(!t)return;
+  const list=store.get('lessons',[]);list.unshift({d:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}),t});
+  store.set('lessons',list);inp.value='';renderLessons();}
+$('#addLesson').onclick=addLesson;$('#lessonInput').addEventListener('keydown',e=>{if(e.key==='Enter')addLesson();});
+renderLessons();
+
+const blindspots=[['mkt','What exactly is my edge — what makes money now?'],['size','Account size &amp; true risk tolerance'],['tf','Primary timeframe: scalp / day / swing?'],['mistake','My biggest recurring mistake']];
+renderChecks('#blindspots',blindspots,'blindspots');
+
+/* ---------- Learning roadmap ---------- */
+const PHASES=[
+  ['Technical Analysis',['Market structure: trend, S/R, supply/demand','Price action &amp; candle patterns','Core indicators used right (MA, VWAP, RSI, MACD, BB)','Multi-timeframe alignment','Entries, stops &amp; targets as rules']],
+  ['Fundamental Analysis',['How to read an earnings report','Metrics that matter (P/E, growth, FCF, margins)','Sector drivers — the AI-capex chain','Catalyst calendar: earnings, Fed, CPI/jobs']],
+  ['Options Mastery',['Delta / Theta / Vega in practice','IV &amp; IV Rank — when to buy vs sell premium','Spreads: debit &amp; credit, and when each fits','Strike &amp; expiration selection']],
+  ['Risk &amp; Psychology',['Position sizing &amp; the 1–2% rule','R-multiples &amp; expectancy','Journaling every trade','Beating tilt, FOMO &amp; revenge trading']]
+];
+function buildPhases(){
+  const host=$('#phases');host.innerHTML='';const done=store.get('learn',{});
+  PHASES.forEach(([title,items],pi)=>{
+    const p=document.createElement('div');p.className='panel phase';
+    p.innerHTML=`<div class="ph-head"><span class="n">${pi+1}</span><h3 style="font-size:15px">${title}</h3></div>`;
+    const box=document.createElement('div');
+    items.forEach((txt,ii)=>{
+      const key='p'+pi+'i'+ii;
+      const lab=document.createElement('label');lab.className='check'+(done[key]?' done':'');
+      lab.innerHTML=`<input type="checkbox" ${done[key]?'checked':''}><span>${txt}</span>`;
+      lab.querySelector('input').onchange=e=>{done[key]=e.target.checked;store.set('learn',done);lab.classList.toggle('done',e.target.checked);updateLearn();};
+      box.appendChild(lab);
+    });
+    p.appendChild(box);host.appendChild(p);
+  });
+}
+function updateLearn(){
+  const done=store.get('learn',{});const total=PHASES.reduce((a,[,i])=>a+i.length,0);
+  const n=Object.values(done).filter(Boolean).length;const pct=Math.round(n/total*100);
+  $('#learnBar').style.width=pct+'%';$('#learnPct').textContent=pct+'%';
+}
+buildPhases();updateLearn();
+
+/* ---------- Scroll-spy nav ---------- */
+const secs=$$('section');const navlinks=$$('#nav a');
+const spy=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){
+  navlinks.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id));}});},{rootMargin:'-45% 0px -50% 0px'});
+secs.forEach(s=>spy.observe(s));
+
+/* reveal on load */
+$$('.reveal').forEach((el,i)=>{el.style.animationDelay=(i*60)+'ms';});
+</script>
+</body>
+</html>
