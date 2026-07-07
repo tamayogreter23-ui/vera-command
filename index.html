@@ -212,6 +212,30 @@ section{scroll-margin-top:128px;margin-top:40px}
 .disc{margin-top:10px;padding:12px 16px;border-radius:var(--r-sm);background:color-mix(in srgb,var(--warn) 8%,var(--panel));
   border:1px solid color-mix(in srgb,var(--warn) 30%,var(--border-soft));color:var(--ink-2);font-size:12.5px}
 
+/* photo entries: mistakes log + learning library */
+.ti{width:100%;background:var(--panel-2);border:1px solid var(--border);color:var(--ink);border-radius:9px;padding:11px 13px;font-size:14px;font-family:var(--sans);resize:vertical}
+textarea.ti{min-height:46px}
+.ti:focus{outline:2px solid var(--accent);outline-offset:1px}
+.filebtn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13px;padding:10px 14px;border-radius:9px;cursor:pointer;background:var(--panel-2);color:var(--ink-2);border:1px dashed var(--border);transition:.15s}
+.filebtn:hover{color:var(--ink);border-color:var(--accent)}
+.filebtn input{display:none}
+.entries{display:flex;flex-direction:column;gap:12px;margin-top:14px}
+.entry{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:start;padding:13px;background:var(--panel-2);border:1px solid var(--border-soft);border-radius:var(--r-sm)}
+.entry .thumb{width:120px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:zoom-in;background:var(--bg)}
+.entry .edate{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.entry .emiss{font-size:14px;color:var(--ink);margin:3px 0 6px}
+.entry .efix{font-size:13px;color:var(--good)}
+.entry .del{background:none;border:0;color:var(--ink-3);cursor:pointer;font-size:16px}
+.entry .del:hover{color:var(--bad)}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:14px}
+.gcard{background:var(--panel-2);border:1px solid var(--border-soft);border-radius:var(--r-sm);overflow:hidden;position:relative}
+.gcard img{width:100%;height:130px;object-fit:cover;cursor:zoom-in;display:block;background:var(--bg)}
+.gcard .cap{padding:8px 10px;font-size:12px;color:var(--ink-2)}
+.gcard .cap .d{font-family:var(--mono);font-size:10px;color:var(--ink-3);display:block;margin-bottom:2px}
+.gcard .del{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.55);border:0;color:#fff;width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:13px;line-height:1}
+.modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
+.modal.on{display:flex}
+.modal img{max-width:100%;max-height:100%;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 .reveal{opacity:0;transform:translateY(10px);animation:rise .6s ease forwards}
 @keyframes rise{to{opacity:1;transform:none}}
@@ -431,6 +455,20 @@ section{scroll-margin-top:128px;margin-top:40px}
       </div>
     </div>
     <div class="panel card" style="margin-top:16px">
+      <h3>Trade mistake log &mdash; with screenshots</h3>
+      <p class="lead">Log the mistake, add a screenshot of your entry, and write what you should have done. Date &rarr; mistake (photo) &rarr; the fix.</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <textarea class="ti" id="m_desc" placeholder="What was the mistake? (e.g. Chased TSLA long after it already ran — no pullback, no plan.)"></textarea>
+        <textarea class="ti" id="m_fix" placeholder="What SHOULD you have done? (the lesson learned)"></textarea>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <label class="filebtn">&#128247; Add screenshot<input type="file" id="m_file" accept="image/*"></label>
+          <span class="mono" id="m_fname" style="font-size:12px;color:var(--ink-3)"></span>
+          <button class="btn" id="m_add" style="margin-left:auto">Log mistake</button>
+        </div>
+      </div>
+      <div class="entries" id="m_entries"></div>
+    </div>
+    <div class="panel card" style="margin-top:16px">
       <h3>Lessons log</h3>
       <p class="lead">One lesson per losing trade, one per blind spot Vera catches. This is where the edge compounds.</p>
       <div class="lessons" id="lessons"></div>
@@ -454,6 +492,17 @@ section{scroll-margin-top:128px;margin-top:40px}
       <span class="mono" id="learnPct" style="color:var(--ink-2);font-size:13px">0%</span>
     </div>
     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))" id="phases"></div>
+    <div class="panel card" style="margin-top:16px">
+      <h3>Trade screenshot library</h3>
+      <p class="lead">Upload screenshots of your trades &amp; setups. The market is cyclical &mdash; build the library now and pattern-match future entries against it.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <input class="ti" id="g_note" type="text" placeholder="Label / note (e.g. NVDA breakout over 175 — worked)" style="flex:1;min-width:220px">
+        <label class="filebtn">&#128247; Add photo<input type="file" id="g_file" accept="image/*"></label>
+        <button class="btn" id="g_add">Save to library</button>
+      </div>
+      <span class="mono" id="g_fname" style="font-size:12px;color:var(--ink-3);display:block;margin-top:8px"></span>
+      <div class="gallery" id="g_gallery"></div>
+    </div>
   </section>
 
   <div class="foot">
@@ -699,6 +748,80 @@ function renderJournal(){
 }
 $('#j_reality').innerHTML='&#9888; Reality check: a fixed <b>10%/day</b> target is not sustainable — averaged out, no one on earth compounds that (it turns $1,000 into billions in a year). Chasing a daily % is exactly what makes small accounts oversize and blow up. Use this tracker to measure <b>process and R-multiples</b> (risk ~$20–30 to make $40–60), let the big green days be a bonus, and protect the account first. Skill compounds — the account follows.';
 renderJournal();
+
+/* ---------- Photos: mistake log + learning library (IndexedDB) ---------- */
+let _db=null;
+function db(){return new Promise((res,rej)=>{
+  if(_db)return res(_db);
+  const r=indexedDB.open('veraDash',1);
+  r.onupgradeneeded=e=>{const d=e.target.result;if(!d.objectStoreNames.contains('entries'))d.createObjectStore('entries',{keyPath:'id'});};
+  r.onsuccess=e=>{_db=e.target.result;res(_db);};
+  r.onerror=e=>rej(e);
+});}
+async function dbAll(kind){const d=await db();return new Promise(res=>{
+  const out=[],cur=d.transaction('entries').objectStore('entries').openCursor();
+  cur.onsuccess=e=>{const c=e.target.result;if(c){if(c.value.kind===kind)out.push(c.value);c.continue();}else{out.sort((a,b)=>b.id-a.id);res(out);}};
+  cur.onerror=()=>res(out);
+});}
+async function dbPut(o){const d=await db();return new Promise(res=>{const tx=d.transaction('entries','readwrite');tx.objectStore('entries').put(o);tx.oncomplete=()=>res();});}
+async function dbDel(id){const d=await db();return new Promise(res=>{const tx=d.transaction('entries','readwrite');tx.objectStore('entries').delete(id);tx.oncomplete=()=>res();});}
+function compress(file,max=1280,q=0.82){return new Promise((res,rej)=>{
+  const img=new Image(),url=URL.createObjectURL(file);
+  img.onload=()=>{URL.revokeObjectURL(url);
+    let w=img.width,h=img.height;
+    if(w>max||h>max){if(w>=h){h=Math.round(h*max/w);w=max;}else{w=Math.round(w*max/h);h=max;}}
+    const cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);
+    res(cv.toDataURL('image/jpeg',q));};
+  img.onerror=()=>{URL.revokeObjectURL(url);rej();};
+  img.src=url;
+});}
+const modal=document.createElement('div');modal.className='modal';modal.innerHTML='<img alt="Trade screenshot">';document.body.appendChild(modal);
+modal.onclick=()=>modal.classList.remove('on');
+function view(src){modal.querySelector('img').src=src;modal.classList.add('on');}
+
+let m_img=null;
+$('#m_file').onchange=async e=>{const f=e.target.files[0];if(!f)return;$('#m_fname').textContent='compressing…';try{m_img=await compress(f);$('#m_fname').textContent='✓ '+f.name;}catch{$('#m_fname').textContent='could not read image';}};
+$('#m_add').onclick=async()=>{
+  const desc=$('#m_desc').value.trim(),fix=$('#m_fix').value.trim();
+  if(!desc&&!m_img)return;
+  await dbPut({id:Date.now(),kind:'mistake',date:etDate(),desc,fix,img:m_img||''});
+  $('#m_desc').value='';$('#m_fix').value='';m_img=null;$('#m_fname').textContent='';$('#m_file').value='';
+  renderMistakePhotos();
+};
+async function renderMistakePhotos(){
+  const host=$('#m_entries'),arr=await dbAll('mistake');host.innerHTML='';
+  if(!arr.length){host.innerHTML='<div class="edate" style="padding:8px 0">No logged mistakes yet — every one you log is one you stop repeating.</div>';return;}
+  arr.forEach(en=>{
+    const d=document.createElement('div');d.className='entry';
+    d.innerHTML=(en.img?`<img class="thumb" src="${en.img}" alt="entry screenshot">`:'<div class="thumb" style="display:grid;place-items:center;color:var(--ink-3);font-family:var(--mono);font-size:11px">no photo</div>')+
+      `<div><div class="edate">${en.date}</div><div class="emiss">${en.desc||''}</div>${en.fix?`<div class="efix"><b>Should have:</b> ${en.fix}</div>`:''}</div>`+
+      `<button class="del" title="Delete" aria-label="Delete">&times;</button>`;
+    const t=d.querySelector('.thumb');if(en.img&&t)t.onclick=()=>view(en.img);
+    d.querySelector('.del').onclick=async()=>{await dbDel(en.id);renderMistakePhotos();};
+    host.appendChild(d);
+  });
+}
+
+let g_img=null;
+$('#g_file').onchange=async e=>{const f=e.target.files[0];if(!f)return;$('#g_fname').textContent='compressing…';try{g_img=await compress(f);$('#g_fname').textContent='✓ '+f.name;}catch{$('#g_fname').textContent='could not read image';}};
+$('#g_add').onclick=async()=>{
+  if(!g_img){$('#g_fname').textContent='pick a photo first';return;}
+  await dbPut({id:Date.now(),kind:'learning',date:etDate(),desc:$('#g_note').value.trim(),img:g_img});
+  $('#g_note').value='';g_img=null;$('#g_fname').textContent='';$('#g_file').value='';
+  renderLibrary();
+};
+async function renderLibrary(){
+  const host=$('#g_gallery'),arr=await dbAll('learning');host.innerHTML='';
+  if(!arr.length){host.innerHTML='<div class="edate" style="padding:8px 0">Library empty — upload your first trade screenshot to start pattern-matching.</div>';return;}
+  arr.forEach(en=>{
+    const c=document.createElement('div');c.className='gcard';
+    c.innerHTML=`<img src="${en.img}" alt="${(en.desc||'trade').replace(/"/g,'')}"><div class="cap"><span class="d">${en.date}</span>${en.desc||''}</div><button class="del" title="Delete" aria-label="Delete">&times;</button>`;
+    c.querySelector('img').onclick=()=>view(en.img);
+    c.querySelector('.del').onclick=async()=>{await dbDel(en.id);renderLibrary();};
+    host.appendChild(c);
+  });
+}
+renderMistakePhotos();renderLibrary();
 
 /* ---------- Scroll-spy nav ---------- */
 const secs=$$('section');const navlinks=$$('#nav a');
