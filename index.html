@@ -420,6 +420,23 @@ section{scroll-margin-top:128px;margin-top:40px}
     </div>
 
     <div class="panel card" style="margin-top:16px">
+      <h3>Live gain checker &amp; letting winners run</h3>
+      <p class="lead">When a trade is running past your target, this shows exactly where you stand right now &mdash; then the rules for capturing the extra instead of capping at 10%.</p>
+      <div class="grid" style="grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:end">
+        <div class="field" style="padding:0"><label>Cost ($)</label><input id="l_cost" type="number" placeholder="250" class="mono"></div>
+        <div class="field" style="padding:0"><label>Current price ($)</label><input id="l_now" type="number" placeholder="350" class="mono"></div>
+        <div class="field" style="padding:0"><label>Fees ($)</label><input id="l_fee" type="number" placeholder="2" class="mono"></div>
+        <button class="btn" id="l_btn">Check</button>
+      </div>
+      <div id="l_out" class="branch" style="margin-top:14px;display:none"></div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">
+        <div class="branch"><span class="q">RULE 1 &mdash; TAKE PARTIALS</span><br>At your target (say +10%), <b>sell part of it</b> (e.g. half) to lock profit. The rest is now playing with house money.</div>
+        <div class="branch"><span class="q">RULE 2 &mdash; TRAIL THE STOP</span><br>Move your stop up to break-even, then keep trailing it under the move. Let the runner run &mdash; this is where the +40% days come from.</div>
+        <div class="branch"><span class="q">RULE 3 &mdash; PLAN THE EXIT, DON'T GET GREEDY</span><br>Have a plan for the runner too (a level, or &quot;trail until it stops me out&quot;). Giving back a big gain hurts more than taking a small one.</div>
+      </div>
+    </div>
+
+    <div class="panel card" style="margin-top:16px">
       <h3>Trade log</h3>
       <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px" class="mono">
         <thead><tr style="text-align:right;color:var(--ink-3)">
@@ -692,6 +709,17 @@ $('#e_btn').onclick=()=>{
   if(!c||!t){out.innerHTML='Enter a position cost and a target %.';return;}
   const sell=c*(1+t/100)+f, profit=c*t/100, be=c+f;
   out.innerHTML=`<b style="color:var(--good)">Sell for $${sell.toFixed(2)}</b> to net <b>$${profit.toFixed(2)}</b> (${t}% after $${f.toFixed(2)} fees).<br><span style="color:var(--ink-3)">Break-even (fees only): $${be.toFixed(2)}</span>`;
+};
+
+$('#l_btn').onclick=()=>{
+  const c=+$('#l_cost').value, now=+$('#l_now').value, f=+$('#l_fee').value||0, out=$('#l_out');
+  out.style.display='block';
+  if(!c||!now){out.innerHTML='Enter your cost and the current price.';return;}
+  const gain=now-c-f, pct=c?gain/c*100:0, col=gain>=0?'var(--good)':'var(--bad)';
+  let tip= pct>=10?' <b style="color:var(--good)">Past your 10% target</b> — take partials and trail your stop to bank it and let the rest run.'
+         : pct>0?' Green but under target — hold to plan.'
+         : ' In the red — respect your stop, no hoping.';
+  out.innerHTML=`Right now you are <b style="color:${col}">${sd(gain)} (${sp(pct)})</b> after $${f.toFixed(2)} fees.`+tip;
 };
 
 $('#t_btn').onclick=()=>{
