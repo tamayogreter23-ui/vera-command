@@ -236,6 +236,12 @@ textarea.ti{min-height:46px}
 .modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
 .modal.on{display:flex}
 .modal img{max-width:100%;max-height:100%;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.strat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:16px;margin-top:6px}
+.strat-card{position:relative;background:var(--panel);border:1px solid var(--border-soft);border-radius:var(--r-sm);overflow:hidden;cursor:zoom-in;transition:.2s}
+.strat-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.strat-card img{width:100%;height:auto;display:block}
+.strat-card .badge{position:absolute;top:8px;left:8px;background:rgba(8,17,32,.72);color:var(--accent);font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--border)}
+@media(max-width:520px){.strat-grid{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 .reveal{opacity:0;transform:translateY(10px);animation:rise .6s ease forwards}
 @keyframes rise{to{opacity:1;transform:none}}
@@ -269,6 +275,7 @@ textarea.ti{min-height:46px}
 <nav class="pills" id="nav">
   <a href="#overview" class="active">Overview</a>
   <a href="#charts">Live Charts</a>
+  <a href="#strategies">Strategies</a>
   <a href="#guidelines">Guidelines</a>
   <a href="#risk">Risk &amp; Sizing</a>
   <a href="#journal">Journal &amp; P&amp;L</a>
@@ -315,6 +322,12 @@ textarea.ti{min-height:46px}
     <div class="panel chart-shell chart-main reveal"><div id="mainChart" style="height:100%"></div></div>
     <div class="sec-head" style="margin-top:26px"><h3 style="font-family:var(--disp);font-size:16px">Watchlist — live minis</h3><span class="note">Semis, mega-cap tech &amp; index ETFs at a glance.</span></div>
     <div class="grid mini-grid" id="miniGrid"></div>
+  </section>
+
+  <!-- STRATEGIES -->
+  <section id="strategies">
+    <div class="sec-head"><h2>Strategies</h2><span class="note">Your class strategy charts &mdash; the graphs only. Click any to enlarge.</span></div>
+    <div class="strat-grid" id="stratGrid"></div>
   </section>
 
   <!-- GUIDELINES -->
@@ -822,6 +835,18 @@ async function renderLibrary(){
   });
 }
 renderMistakePhotos();renderLibrary();
+
+/* ---------- Strategies gallery ---------- */
+(function(){
+  const host=$('#stratGrid');if(!host)return;
+  for(let i=1;i<=21;i++){
+    const nn=String(i).padStart(2,'0');
+    const c=document.createElement('div');c.className='strat-card';
+    c.innerHTML=`<span class="badge">#${nn}</span><img src="charts/chart-${nn}.jpg" alt="Strategy ${i}" loading="lazy">`;
+    c.onclick=()=>view(`charts/chart-${nn}.jpg`);
+    host.appendChild(c);
+  }
+})();
 
 /* ---------- Scroll-spy nav ---------- */
 const secs=$$('section');const navlinks=$$('#nav a');
