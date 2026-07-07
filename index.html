@@ -246,8 +246,6 @@ section{scroll-margin-top:128px;margin-top:40px}
   <a href="#overview" class="active">Overview</a>
   <a href="#charts">Live Charts</a>
   <a href="#guidelines">Guidelines</a>
-  <a href="#playbook">Playbook</a>
-  <a href="#options">Options</a>
   <a href="#risk">Risk &amp; Sizing</a>
   <a href="#journal">Journal &amp; P&amp;L</a>
   <a href="#mistakes">Mistakes</a>
@@ -315,39 +313,6 @@ section{scroll-margin-top:128px;margin-top:40px}
       </div>
     </div>
     <div class="disc">These start from your vault's <b>Trading Rules — Non-Negotiable</b>. Rules are earned from lessons; we sharpen them as we go. Vera flags any plan that breaks a rule <b>before</b> it becomes a trade.</div>
-  </section>
-
-  <!-- PLAYBOOK -->
-  <section id="playbook">
-    <div class="sec-head"><h2>Setups Playbook</h2><span class="note">From your INVESTEP training — track win-rate on each so we keep what works.</span></div>
-    <div class="grid play-grid" id="playGrid"></div>
-    <div class="disc">These are seeded from your course methodology. The exact entry/invalidation rules are yours to sharpen — as you log trades, Vera surfaces which setups actually pay and which to cut.</div>
-  </section>
-
-  <!-- OPTIONS -->
-  <section id="options">
-    <div class="sec-head"><h2>Options Cockpit</h2><span class="note">You trade options daily — this is the part that separates you from the crowd.</span></div>
-    <div class="grid two-col">
-      <div class="panel card">
-        <h3>The Greeks that matter daily</h3>
-        <p class="lead">Direction, time, and volatility — in plain English.</p>
-        <div class="greek"><span class="g">Δ Delta</span><span class="d"><b>Direction.</b> How much the option moves per $1 in the stock. ~0.50 at the money. Higher delta = more stock-like.</span></div>
-        <div class="greek"><span class="g">Θ Theta</span><span class="d"><b>Time decay.</b> What you lose each day just from time passing. It works against buyers, for sellers. Worst near expiration.</span></div>
-        <div class="greek"><span class="g">V Vega</span><span class="d"><b>Volatility.</b> How much the option moves when implied volatility (IV) changes. High IV = expensive options = crush risk.</span></div>
-        <div class="greek"><span class="g">Γ Gamma</span><span class="d"><b>Acceleration.</b> How fast delta changes. High near expiry — why short-dated options whip around.</span></div>
-      </div>
-      <div class="panel card">
-        <h3>Buy or sell premium? — decision tree</h3>
-        <p class="lead">The single most useful options question, every day.</p>
-        <div class="tree">
-          <div class="branch"><span class="q">STEP 1 — IV</span><br>Is implied volatility (IV Rank) <b>high</b> or <b>low</b> right now?</div>
-          <div class="branch"><span class="q">LOW IV + directional view</span><br><b>Buy premium</b> (long calls/puts or debit spreads). Options are cheap; you're paying little for time.</div>
-          <div class="branch"><span class="q">HIGH IV + directional view</span><br>Lean to <b>debit spreads</b> or <b>selling premium</b> (credit spreads) — don't overpay for rich vol, and dodge the IV crush.</div>
-          <div class="branch"><span class="q">EARNINGS this week?</span><br><b>Beware IV crush.</b> Buying single options into earnings often loses even when you're right on direction. Spreads reduce it.</div>
-        </div>
-      </div>
-    </div>
-    <div class="disc">Education, not advice. IV Rank and the expected move are on your ThinkorSwim chain — Vera flags earnings/IV-crush timing in your morning brief.</div>
   </section>
 
   <!-- RISK -->
@@ -593,30 +558,6 @@ function renderChecks(host,list,key){
 renderChecks('#entryRules',entryRules,'entryRules');
 renderChecks('#exitRules',exitRules,'exitRules');
 renderChecks('#riskRules',riskRules,'riskRules');
-
-/* ---------- Playbook (INVESTEP setups) ---------- */
-const SETUPS=[
-  ['Support &amp; Resistance','Niveles de Soporte y Resistencia','Trade the reaction at key levels — buy support in an uptrend, sell/short resistance in a downtrend. The level must be tested and respected.'],
-  ['NY Open Jumps','Saltos NY','The opening-range move at the 9:30 ET bell. Wait for the range to form, then trade the break with the trend of the tape.'],
-  ['Trend Change','Cambio de Tendencia','Structure flips — lower-highs turn to higher-highs (or vice-versa). Enter on confirmation, not the first candle. Works on 15m and Daily.'],
-  ['Mid-Point Bounce','Rebote Punto Medio','Price reacts off the mid-point of a prior range/move. Confluence with a level or MA strengthens it.'],
-  ['Block Movement','Movimiento en Bloques','Price travels in measured blocks/legs. Read where the current block is exhausting to time entries and exits.'],
-  ['Bollinger Bands','Bollinger Bands','Band squeeze = coiling for a move; band ride = strong trend; band tag + reversal = mean-reversion. Pair with structure.'],
-  ['The Million Strategy','Estrategia del Millón','Your highest-conviction, rules-based core play. Only take it when every condition lines up — this is the A+ setup.'],
-  ['Reinforcement Points','Puntos de Refuerzo','Add/confirm zones where the thesis strengthens. Use to scale or to confirm — never to rescue a losing idea.']
-];
-function buildPlaybook(){
-  const g=$('#playGrid');g.innerHTML='';const wr=store.get('winrate',{});
-  SETUPS.forEach(([en,es,desc],i)=>{
-    const c=document.createElement('div');c.className='panel setup';
-    c.innerHTML=`<div><h4>${en}</h4><div class="es">${es}</div></div><p>${desc}</p>
-      <div class="row"><span class="chip acc">Track it</span>
-      <span class="wr">Win-rate <input type="number" min="0" max="100" value="${wr['s'+i]??''}" placeholder="—" data-i="${i}"><span class="unit mono" style="color:var(--ink-3)">%</span></span></div>`;
-    c.querySelector('input').oninput=e=>{wr['s'+i]=e.target.value;store.set('winrate',wr);};
-    g.appendChild(c);
-  });
-}
-buildPlaybook();
 
 /* ---------- Position size calculator ---------- */
 $('#calcBtn').onclick=()=>{
