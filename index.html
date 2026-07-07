@@ -249,6 +249,7 @@ section{scroll-margin-top:128px;margin-top:40px}
   <a href="#playbook">Playbook</a>
   <a href="#options">Options</a>
   <a href="#risk">Risk &amp; Sizing</a>
+  <a href="#journal">Journal &amp; P&amp;L</a>
   <a href="#mistakes">Mistakes</a>
   <a href="#learning">Learning</a>
 </nav>
@@ -379,6 +380,56 @@ section{scroll-margin-top:128px;margin-top:40px}
         <div id="riskRules"></div>
       </div>
     </div>
+  </section>
+
+  <!-- JOURNAL & P&L -->
+  <section id="journal">
+    <div class="sec-head"><h2>Trade Journal &amp; Daily P&amp;L</h2><span class="note">Log every trade. See your day's %, running balance, and the exact sell price to hit your target after fees.</span></div>
+    <div class="grid tiles">
+      <div class="tile panel"><span class="k">Account balance</span><span class="v acc" id="j_bal">$1,000</span><span class="m">start + logged P&amp;L</span></div>
+      <div class="tile panel"><span class="k">Total P&amp;L</span><span class="v" id="j_total">+$0.00</span><span class="m" id="j_totalpct">0.0% overall</span></div>
+      <div class="tile panel"><span class="k">Today's P&amp;L</span><span class="v" id="j_today">+$0.00</span><span class="m" id="j_todaypct">0.0% today</span></div>
+      <div class="tile panel"><span class="k">Record</span><span class="v" id="j_count">0</span><span class="m" id="j_wl">0W / 0L</span></div>
+    </div>
+
+    <div class="grid two-col" style="margin-top:16px">
+      <div class="panel card">
+        <h3>Exit target calculator</h3>
+        <p class="lead">What did the position cost, and what % do you want? I'll give you the sell price that nets it after fees. (Options: enter premium &times; 100.)</p>
+        <div class="grid" style="grid-template-columns:1fr 1fr 1fr;gap:12px">
+          <div class="field" style="padding:0"><label>Position cost ($)</label><input id="e_cost" type="number" placeholder="250" class="mono"></div>
+          <div class="field" style="padding:0"><label>Target gain (%)</label><input id="e_tgt" type="number" placeholder="10" class="mono"></div>
+          <div class="field" style="padding:0"><label>Fees round-trip ($)</label><input id="e_fee" type="number" placeholder="2" class="mono"></div>
+        </div>
+        <button class="btn" id="e_btn" style="margin-top:14px;width:100%">Calculate sell price</button>
+        <div id="e_out" class="branch" style="margin-top:14px;display:none"></div>
+      </div>
+      <div class="panel card">
+        <h3>Log a trade</h3>
+        <p class="lead">Enter what it cost and what you sold it for — I compute your profit and roll up the day.</p>
+        <div class="grid" style="grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field" style="padding:0"><label>Ticker</label><input id="t_tkr" type="text" placeholder="TSLA" class="mono"></div>
+          <div class="field" style="padding:0"><label>Type</label><select id="t_type" style="background:var(--panel-2);border:1px solid var(--border);color:var(--ink);border-radius:9px;padding:10px 12px;font-family:var(--mono);font-size:15px"><option>Option</option><option>ETF</option><option>Shares</option></select></div>
+          <div class="field" style="padding:0"><label>Cost ($)</label><input id="t_cost" type="number" placeholder="250" class="mono"></div>
+          <div class="field" style="padding:0"><label>Sold for ($)</label><input id="t_proc" type="number" placeholder="277" class="mono"></div>
+          <div class="field" style="padding:0"><label>Fees ($)</label><input id="t_fee" type="number" placeholder="2" class="mono"></div>
+          <div class="field" style="padding:0"><label>Starting balance ($)</label><input id="t_start" type="number" placeholder="1000" class="mono"></div>
+        </div>
+        <button class="btn" id="t_btn" style="margin-top:14px;width:100%">Add trade</button>
+      </div>
+    </div>
+
+    <div class="panel card" style="margin-top:16px">
+      <h3>Trade log</h3>
+      <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px" class="mono">
+        <thead><tr style="text-align:right;color:var(--ink-3)">
+          <th style="text-align:left;padding:8px 6px">Date</th><th style="text-align:left">Ticker</th><th style="text-align:left">Type</th>
+          <th style="padding:8px 6px">Cost</th><th>Sold</th><th>Fees</th><th>P&amp;L</th><th>%</th><th></th></tr></thead>
+        <tbody id="t_body"></tbody>
+      </table></div>
+    </div>
+
+    <div class="disc" id="j_reality"></div>
   </section>
 
   <!-- MISTAKES -->
@@ -626,6 +677,59 @@ function updateLearn(){
   $('#learnBar').style.width=pct+'%';$('#learnPct').textContent=pct+'%';
 }
 buildPhases();updateLearn();
+
+/* ---------- Trade Journal & Daily P&L ---------- */
+function etDate(){return new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());}
+const sd=n=>(n>=0?'+$':'-$')+Math.abs(n).toFixed(2);
+const sp=n=>(n>=0?'+':'')+n.toFixed(1)+'%';
+const pnlOf=t=>t.proceeds-t.cost-t.fees;
+$('#t_start').value=store.get('jStart',1000);
+$('#t_start').oninput=()=>{store.set('jStart',+$('#t_start').value||0);renderJournal();};
+
+$('#e_btn').onclick=()=>{
+  const c=+$('#e_cost').value,t=+$('#e_tgt').value,f=+$('#e_fee').value||0,out=$('#e_out');
+  out.style.display='block';
+  if(!c||!t){out.innerHTML='Enter a position cost and a target %.';return;}
+  const sell=c*(1+t/100)+f, profit=c*t/100, be=c+f;
+  out.innerHTML=`<b style="color:var(--good)">Sell for $${sell.toFixed(2)}</b> to net <b>$${profit.toFixed(2)}</b> (${t}% after $${f.toFixed(2)} fees).<br><span style="color:var(--ink-3)">Break-even (fees only): $${be.toFixed(2)}</span>`;
+};
+
+$('#t_btn').onclick=()=>{
+  const tkr=$('#t_tkr').value.trim().toUpperCase(),type=$('#t_type').value,cost=+$('#t_cost').value,proc=+$('#t_proc').value||0,fee=+$('#t_fee').value||0;
+  if(!tkr||!cost){return;}
+  const arr=store.get('journal',[]);arr.unshift({id:Date.now(),date:etDate(),tkr,type,cost,proceeds:proc,fees:fee});
+  store.set('journal',arr);
+  ['#t_tkr','#t_cost','#t_proc','#t_fee'].forEach(s=>$(s).value='');
+  renderJournal();
+};
+
+function renderJournal(){
+  const arr=store.get('journal',[]),start=+store.get('jStart',1000)||0;
+  const total=arr.reduce((a,t)=>a+pnlOf(t),0), bal=start+total;
+  const today=etDate(), todayPnl=arr.filter(t=>t.date===today).reduce((a,t)=>a+pnlOf(t),0);
+  const balBefore=bal-todayPnl;
+  const wins=arr.filter(t=>pnlOf(t)>0).length, losses=arr.filter(t=>pnlOf(t)<0).length;
+  $('#j_bal').textContent=money(bal);
+  $('#j_total').textContent=sd(total);$('#j_total').className='v '+(total>0?'good':total<0?'bad':'');
+  $('#j_totalpct').textContent=(start?sp(total/start*100):'0.0%')+' overall';
+  $('#j_today').textContent=sd(todayPnl);$('#j_today').className='v '+(todayPnl>0?'good':todayPnl<0?'bad':'');
+  $('#j_todaypct').textContent=(balBefore?sp(todayPnl/balBefore*100):'0.0%')+' today';
+  $('#j_count').textContent=arr.length;$('#j_wl').textContent=wins+'W / '+losses+'L';
+  const body=$('#t_body');body.innerHTML='';
+  if(!arr.length){body.innerHTML='<tr><td colspan="9" style="padding:14px 6px;color:var(--ink-3)">No trades logged yet — log your first one above.</td></tr>';return;}
+  arr.forEach(t=>{
+    const p=pnlOf(t),pct=t.cost?p/t.cost*100:0,col=p>0?'var(--good)':p<0?'var(--bad)':'var(--ink)';
+    const tr=document.createElement('tr');tr.style.borderTop='1px solid var(--border-soft)';tr.style.textAlign='right';
+    tr.innerHTML=`<td style="text-align:left;padding:8px 6px">${t.date.slice(5)}</td><td style="text-align:left">${t.tkr}</td><td style="text-align:left;color:var(--ink-3)">${t.type}</td>`+
+      `<td>$${t.cost.toFixed(2)}</td><td>$${t.proceeds.toFixed(2)}</td><td>$${t.fees.toFixed(2)}</td>`+
+      `<td style="color:${col}">${sd(p)}</td><td style="color:${col}">${sp(pct)}</td>`+
+      `<td><button aria-label="Delete trade" style="background:none;border:0;color:var(--ink-3);cursor:pointer;font-size:14px">&times;</button></td>`;
+    tr.querySelector('button').onclick=()=>{store.set('journal',store.get('journal',[]).filter(x=>x.id!==t.id));renderJournal();};
+    body.appendChild(tr);
+  });
+}
+$('#j_reality').innerHTML='&#9888; Reality check: a fixed <b>10%/day</b> target is not sustainable — averaged out, no one on earth compounds that (it turns $1,000 into billions in a year). Chasing a daily % is exactly what makes small accounts oversize and blow up. Use this tracker to measure <b>process and R-multiples</b> (risk ~$20–30 to make $40–60), let the big green days be a bonus, and protect the account first. Skill compounds — the account follows.';
+renderJournal();
 
 /* ---------- Scroll-spy nav ---------- */
 const secs=$$('section');const navlinks=$$('#nav a');
