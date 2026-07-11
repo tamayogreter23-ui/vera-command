@@ -243,6 +243,13 @@ textarea.ti{min-height:46px}
 .strat-card .badge{position:absolute;top:8px;left:8px;background:rgba(8,17,32,.72);color:var(--accent);font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--border)}
 @media(max-width:520px){.strat-grid{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+.motto{margin:0 0 16px;padding:16px 20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(120deg,color-mix(in srgb,var(--accent) 20%,var(--panel)),var(--panel) 62%);border:1px solid color-mix(in srgb,var(--accent) 38%,var(--border-soft));border-radius:var(--r);box-shadow:var(--shadow)}
+.motto .phrases{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.motto .phrases b{font-family:var(--disp);font-weight:800;font-size:clamp(15px,2.2vw,21px);letter-spacing:-.01em}
+.motto .phrases .sep{color:var(--accent);font-size:18px}
+.motto .goal{display:flex;flex-direction:column;gap:6px;min-width:230px;flex:1}
+.motto .goal .lbl{display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.motto .goal .lbl b{color:var(--accent)}
 .reveal{opacity:0;transform:translateY(10px);animation:rise .6s ease forwards}
 @keyframes rise{to{opacity:1;transform:none}}
 </style>
@@ -274,6 +281,7 @@ textarea.ti{min-height:46px}
 
 <nav class="pills" id="nav">
   <a href="#overview" class="active">Overview</a>
+  <a href="#plan">Plan</a>
   <a href="#charts">Live Charts</a>
   <a href="#strategies">Strategies</a>
   <a href="#guidelines">Guidelines</a>
@@ -287,6 +295,13 @@ textarea.ti{min-height:46px}
 
   <!-- OVERVIEW -->
   <section id="overview">
+    <div class="motto">
+      <div class="phrases"><b>KEEP IT SIMPLE</b><span class="sep">&bull;</span><b>REMEMBER THE GOAL</b></div>
+      <div class="goal">
+        <div class="lbl"><span>$1,150 start</span><span id="goalNow">&mdash;</span><b>$10,000</b></div>
+        <div class="meter good"><i id="goalBar" style="width:0%"></i></div>
+      </div>
+    </div>
     <div class="sec-head"><h2>Market Pulse</h2><span class="note">Live snapshot of your book &amp; the tape. Updated in real time.</span></div>
     <div class="grid tiles">
       <div class="tile panel reveal"><span class="k">Instruments</span><span class="v acc">Stocks + Options</span><span class="m">Traded daily · ThinkorSwim</span></div>
@@ -311,6 +326,49 @@ textarea.ti{min-height:46px}
           <div class="branch"><span class="q">SEMIS SPLIT</span><br>NVDA vs AMD are rotating apart — treat "chips" as two trades, not one.</div>
           <div class="branch"><span class="q">DISCIPLINE</span><br>No trade without a named setup, a stop set first, and R:R that clears your rule.</div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLAN -->
+  <section id="plan">
+    <div class="sec-head"><h2>The Plan &mdash; $1,150 &rarr; $10,000</h2><span class="note">Your growth path + your market-open routine. Trade the open, then go to work.</span></div>
+    <div class="disc" style="margin-bottom:16px">&#9888; <b>Not "10%/day."</b> That target compounds to billions in a year &mdash; it can't be sustained, and chasing it forces the oversizing that blows up small accounts. We grow by <b>process + consistency + compounding over months</b>. Big green days are a bonus, never a quota &mdash; and some days the best trade is no trade.</div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:16px">
+      <div class="tile panel"><span class="k">Milestone 1</span><span class="v acc">$1,500</span><span class="m">prove consistency</span></div>
+      <div class="tile panel"><span class="k">Milestone 2</span><span class="v">$2,500</span><span class="m">raise size slowly</span></div>
+      <div class="tile panel"><span class="k">Milestone 3</span><span class="v">$5,000</span><span class="m">compounding kicks in</span></div>
+      <div class="tile panel"><span class="k">The Goal</span><span class="v good">$10,000</span><span class="m">meaningful $ per trade</span></div>
+    </div>
+    <div class="grid two-col">
+      <div class="panel card">
+        <h3>Your market-open routine</h3>
+        <p class="lead">You trade only the open, then work &mdash; in and done by ~10:30.</p>
+        <div class="tree">
+          <div class="branch"><span class="q">T-30 MIN &mdash; PREPARE</span><br>Read your "news Spanish" brief. Risk-on or risk-off? NVDA/TSLA pre-market direction + key level? Do Market + Sector + Stock agree?</div>
+          <div class="branch"><span class="q">9:30 &mdash; EXECUTE</span><br>Do NOT chase the first candle. Let the opening range form (5&ndash;15 min) &mdash; your "Saltos NY" setup. Trade only if it aligns with the tape AND matches a chart in Strategies. Stop in FIRST. One or two trades, max.</div>
+          <div class="branch"><span class="q">~10:30 &mdash; DONE</span><br>Log it in Journal &amp; P&amp;L. Go to work. No revenge trades from your phone &mdash; the account is safe until tomorrow.</div>
+        </div>
+        <div class="disc" style="margin-top:14px">Risk <b>$25&ndash;35</b> per trade (2&ndash;3%). Daily stop: 2 losers &rarr; done for the day.</div>
+      </div>
+      <div class="panel card">
+        <h3>Today's Trade Card</h3>
+        <p class="lead">Fill this before 9:30 &mdash; it saves automatically. No clean, aligned setup &rarr; NO TRADE.</p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="field" style="padding:0"><label>Tape today</label><select class="ti" id="tc_tape"><option value="">&mdash;</option><option>Risk-ON</option><option>Risk-OFF</option><option>Mixed</option></select></div>
+          <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px">
+            <div class="field" style="padding:0"><label>NVDA bias</label><select class="ti" id="tc_nb"><option value="">&mdash;</option><option>Long</option><option>Short</option><option>SKIP</option></select></div>
+            <div class="field" style="padding:0"><label>NVDA level / trigger</label><input class="ti" id="tc_nl" placeholder="e.g. break 196"></div>
+            <div class="field" style="padding:0"><label>TSLA bias</label><select class="ti" id="tc_tb"><option value="">&mdash;</option><option>Long</option><option>Short</option><option>SKIP</option></select></div>
+            <div class="field" style="padding:0"><label>TSLA level / trigger</label><input class="ti" id="tc_tl" placeholder="e.g. hold 393"></div>
+            <div class="field" style="padding:0"><label>Instrument</label><input class="ti" id="tc_inst" placeholder="SOXL / TSLL / spread"></div>
+            <div class="field" style="padding:0"><label>Entry</label><input class="ti" id="tc_entry" placeholder="price"></div>
+            <div class="field" style="padding:0"><label>STOP (first!)</label><input class="ti" id="tc_stop" placeholder="price"></div>
+            <div class="field" style="padding:0"><label>Risk $ (&le;35)</label><input class="ti" id="tc_risk" placeholder="30"></div>
+          </div>
+          <div class="field" style="padding:0"><label>Manage the winner</label><input class="ti" id="tc_manage" placeholder="partial at +10%, trail the rest"></div>
+        </div>
+        <button class="btn ghost" style="margin-top:12px" id="tc_reset">New card (reset for tomorrow)</button>
       </div>
     </div>
   </section>
@@ -847,6 +905,25 @@ renderMistakePhotos();renderLibrary();
     host.appendChild(c);
   }
 })();
+
+/* ---------- Plan: trade card + goal banner ---------- */
+(function(){
+  const fields=['tc_tape','tc_nb','tc_nl','tc_tb','tc_tl','tc_inst','tc_entry','tc_stop','tc_risk','tc_manage'];
+  const saved=store.get('tradecard',{});
+  fields.forEach(id=>{const el=$('#'+id);if(!el)return;if(saved[id]!=null)el.value=saved[id];
+    el.oninput=el.onchange=()=>{const s=store.get('tradecard',{});s[id]=el.value;store.set('tradecard',s);};});
+  const rb=$('#tc_reset');if(rb)rb.onclick=()=>{store.set('tradecard',{});fields.forEach(id=>{const el=$('#'+id);if(el)el.value='';});};
+})();
+function updateGoal(){
+  const bar=$('#goalBar');if(!bar)return;
+  const start=+store.get('jStart',1000)||0;
+  const total=(store.get('journal',[])||[]).reduce((a,t)=>a+((+t.proceeds||0)-(+t.cost||0)-(+t.fees||0)),0);
+  const bal=start+total, base=1150, goal=10000;
+  const pct=Math.max(0,Math.min(100,(bal-base)/(goal-base)*100));
+  bar.style.width=pct.toFixed(1)+'%';
+  const now=$('#goalNow');if(now)now.textContent=money(bal)+' now';
+}
+updateGoal();
 
 /* ---------- Scroll-spy nav ---------- */
 const secs=$$('section');const navlinks=$$('#nav a');
