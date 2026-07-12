@@ -282,6 +282,7 @@ textarea.ti{min-height:46px}
 <nav class="pills" id="nav">
   <a href="#overview" class="active">Overview</a>
   <a href="#plan">Plan</a>
+  <a href="#acciones">Acciones</a>
   <a href="#charts">Live Charts</a>
   <a href="#strategies">Strategies</a>
   <a href="#guidelines">Guidelines</a>
@@ -371,6 +372,55 @@ textarea.ti{min-height:46px}
         <button class="btn ghost" style="margin-top:12px" id="tc_reset">New card (reset for tomorrow)</button>
       </div>
     </div>
+  </section>
+
+  <!-- ACCIONES (long-term investing) -->
+  <section id="acciones">
+    <div class="sec-head"><h2>Acciones &mdash; Long-Term Portfolio</h2><span class="note">Your investing account (Schwab Individual *568). Grow it exponentially &mdash; the honest way.</span></div>
+    <div class="disc" style="margin-bottom:16px">&#128200; <b>"Exponential" is REAL here</b> &mdash; compounding literally IS exponential growth. The engine isn't speed, it's <b>TIME + CONSISTENCY + reinvested dividends (DRIP)</b>. Small &amp; steady every month becomes a snowball that curves up over years. Buy &amp; hold, don't panic-sell, and only invest money you can leave to grow.</div>
+    <div class="grid two-col">
+      <div class="panel card">
+        <h3>Your structure: Core + Satellite</h3>
+        <div class="tree">
+          <div class="branch"><span class="q">CORE (most of it)</span><br><b>VOO</b> &mdash; the whole S&amp;P 500 in one buy. Safe, diversified, hands-off. Your foundation.</div>
+          <div class="branch"><span class="q">SATELLITE (smaller slice)</span><br>2&ndash;4 growth stocks you believe in (NVDA, etc.). Higher risk &amp; reward.</div>
+          <div class="branch"><span class="q">DCA &mdash; the habit</span><br>Add a fixed amount EVERY month, no matter the price. Consistency beats timing.</div>
+          <div class="branch"><span class="q">DRIP &mdash; the snowball</span><br>Reinvest Dividends ON &rarr; dividends auto-buy more shares. Compounding on autopilot.</div>
+        </div>
+      </div>
+      <div class="panel card">
+        <h3>Compound Growth Projector</h3>
+        <p class="lead">See the exponential curve for real. Estimate only &mdash; markets vary, not a guarantee.</p>
+        <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px">
+          <div class="field" style="padding:0"><label>Starting ($)</label><input id="inv_start" class="ti" type="number" placeholder="200"></div>
+          <div class="field" style="padding:0"><label>Add per month ($)</label><input id="inv_month" class="ti" type="number" placeholder="200"></div>
+          <div class="field" style="padding:0"><label>Years</label><input id="inv_years" class="ti" type="number" placeholder="20"></div>
+          <div class="field" style="padding:0"><label>Return %/yr</label><input id="inv_rate" class="ti" type="number" placeholder="8"></div>
+        </div>
+        <button class="btn" id="inv_btn" style="margin-top:14px;width:100%">Show the curve</button>
+        <div id="inv_out" class="branch" style="margin-top:14px;display:none"></div>
+      </div>
+    </div>
+    <div class="panel card" style="margin-top:16px">
+      <h3>My holdings</h3>
+      <p class="lead">Log what you own to track your portfolio's value &amp; growth. (Update "current value" now and then.)</p>
+      <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:12px">
+        <div class="tile"><span class="k">Invested</span><span class="v" id="h_ti">$0</span></div>
+        <div class="tile"><span class="k">Current value</span><span class="v acc" id="h_tv">$0</span></div>
+        <div class="tile"><span class="k">Total gain</span><span class="v" id="h_g">+$0.00</span><span class="m" id="h_gp">0.0%</span></div>
+      </div>
+      <div class="grid" style="grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end;margin-top:12px">
+        <div class="field" style="padding:0"><label>Ticker</label><input id="h_tkr" class="ti" placeholder="VOO"></div>
+        <div class="field" style="padding:0"><label>Invested ($)</label><input id="h_inv" class="ti" type="number" placeholder="200"></div>
+        <div class="field" style="padding:0"><label>Current value ($)</label><input id="h_val" class="ti" type="number" placeholder="200"></div>
+        <button class="btn" id="h_add">Add</button>
+      </div>
+      <div style="overflow-x:auto;margin-top:12px"><table style="width:100%;border-collapse:collapse;font-size:13px" class="mono">
+        <thead><tr style="text-align:right;color:var(--ink-3)"><th style="text-align:left;padding:8px 6px">Ticker</th><th>Invested</th><th>Value</th><th>Gain</th><th>%</th><th></th></tr></thead>
+        <tbody id="h_body"></tbody>
+      </table></div>
+    </div>
+    <div class="disc" style="margin-top:16px">Rules for this account: <b>buy &amp; hold</b>, DRIP ON, add every month, <b>never panic-sell a dip</b> (dips are discounts for long-term investors), and only invest money you can leave for years. Analysis &amp; education, not advice &mdash; you decide.</div>
   </section>
 
   <!-- LIVE CHARTS -->
@@ -924,6 +974,42 @@ function updateGoal(){
   const now=$('#goalNow');if(now)now.textContent=money(bal)+' now';
 }
 updateGoal();
+
+/* ---------- Acciones: compound projector + holdings ---------- */
+$('#inv_btn').onclick=()=>{
+  const P=+$('#inv_start').value||0, m=+$('#inv_month').value||0, y=+$('#inv_years').value||0, r=(+$('#inv_rate').value||8)/100, out=$('#inv_out');
+  out.style.display='block';
+  if(!y){out.innerHTML='Enter how many years.';return;}
+  const n=y*12, i=r/12;
+  const fv = i===0 ? P+m*n : P*Math.pow(1+i,n)+m*(Math.pow(1+i,n)-1)/i;
+  const put=P+m*n, grow=fv-put;
+  out.innerHTML=`In <b>${y}</b> years at ~${(r*100).toFixed(0)}%/yr:<br><b style="color:var(--good);font-size:22px">${money(fv)}</b><br><span style="color:var(--ink-3)">You put in ${money(put)} &middot; compounding added <b style="color:var(--accent)">${money(grow)}</b></span>`;
+};
+$('#h_add').onclick=()=>{
+  const tkr=$('#h_tkr').value.trim().toUpperCase(), inv=+$('#h_inv').value||0, val=+$('#h_val').value||0;
+  if(!tkr)return;
+  const a=store.get('invHoldings',[]); a.unshift({id:Date.now(),tkr,inv,val}); store.set('invHoldings',a);
+  ['#h_tkr','#h_inv','#h_val'].forEach(s=>$(s).value=''); renderHoldings();
+};
+function renderHoldings(){
+  const a=store.get('invHoldings',[]), body=$('#h_body');
+  const ti=a.reduce((s,x)=>s+x.inv,0), tv=a.reduce((s,x)=>s+x.val,0), g=tv-ti;
+  $('#h_ti').textContent=money(ti); $('#h_tv').textContent=money(tv);
+  $('#h_g').textContent=sd(g); $('#h_g').className='v '+(g>0?'good':g<0?'bad':'');
+  $('#h_gp').textContent=(ti?sp(g/ti*100):'0.0%')+' total';
+  body.innerHTML='';
+  if(!a.length){body.innerHTML='<tr><td colspan="6" style="padding:12px 6px;color:var(--ink-3)">No holdings yet — log your first buy (e.g. VOO).</td></tr>';return;}
+  a.forEach(x=>{
+    const gg=x.val-x.inv, gp=x.inv?gg/x.inv*100:0, col=gg>0?'var(--good)':gg<0?'var(--bad)':'var(--ink)';
+    const tr=document.createElement('tr');tr.style.borderTop='1px solid var(--border-soft)';tr.style.textAlign='right';
+    tr.innerHTML=`<td style="text-align:left;padding:8px 6px">${x.tkr}</td><td>$${x.inv.toFixed(2)}</td><td>$${x.val.toFixed(2)}</td>`+
+      `<td style="color:${col}">${sd(gg)}</td><td style="color:${col}">${sp(gp)}</td>`+
+      `<td><button aria-label="Delete" style="background:none;border:0;color:var(--ink-3);cursor:pointer;font-size:14px">&times;</button></td>`;
+    tr.querySelector('button').onclick=()=>{store.set('invHoldings',store.get('invHoldings',[]).filter(z=>z.id!==x.id));renderHoldings();};
+    body.appendChild(tr);
+  });
+}
+renderHoldings();
 
 /* ---------- Scroll-spy nav ---------- */
 const secs=$$('section');const navlinks=$$('#nav a');
